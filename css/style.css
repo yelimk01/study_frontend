@@ -1,0 +1,8 @@
+/* 공통 스타일: 담당자끼리 수정 범위를 협의하세요. */
+body { color: #212529; background: #fff; }
+nav a { text-decoration: none; }
+.form-panel { max-width: 480px; }
+.placeholder-box {
+  min-height: 320px; display: grid; place-items: center;
+  background: #f8f9fa; border: 1px dashed #adb5bd; border-radius: 8px;
+}
