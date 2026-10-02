@@ -21,6 +21,109 @@
   let info;
   let results = [];
   const districtCache = new Map();
+  const detailCache = new Map();
+  const dialog = $("detail-dialog");
+  let detailController;
+  let detailVersion = 0;
+  let selectedIndex = -1;
+  let detailTrigger;
+  const preferredType = new URLSearchParams(window.location.search).get("type");
+  if (Array.from(type.options).some((option) => option.value === preferredType)) type.value = preferredType;
+
+  function categoryName(item) {
+    return Array.from(type.options).find((option) => option.value === String(item.contenttypeid))?.textContent || "관광정보";
+  }
+
+  function plainText(value) {
+    // API의 HTML을 삽입하지 않고 줄바꿈과 텍스트만 표시합니다.
+    const parsed = new DOMParser().parseFromString(String(value || "").replace(/<br\s*\/?\s*>/gi, "\n"), "text/html");
+    parsed.querySelectorAll("script, style").forEach((node) => node.remove());
+    return parsed.body.textContent.trim();
+  }
+
+  function paintDetail(item) {
+    $("detail-title").textContent = item.title || "이름 없음";
+    $("detail-category").textContent = categoryName(item);
+    $("detail-address").textContent = [item.addr1, item.addr2].filter(Boolean).join(" ") || "주소 정보가 없습니다.";
+    $("detail-phone").textContent = plainText(item.tel) || "등록된 연락처가 없습니다.";
+    $("detail-overview").textContent = plainText(item.overview) || "등록된 소개 정보가 없습니다.";
+    const photo = imageUrl(item.firstimage || item.firstimage2);
+    const container = $("detail-photo");
+    container.replaceChildren();
+    container.textContent = "사진 준비 중";
+    if (photo) {
+      const image = document.createElement("img");
+      image.src = photo;
+      image.alt = `${item.title || "관광지"} 사진`;
+      image.addEventListener("error", () => { container.textContent = "사진을 불러올 수 없습니다."; }, { once: true });
+      container.replaceChildren(image);
+    }
+    $("detail-map").disabled = !map || !markers[selectedIndex];
+  }
+
+  async function loadDetail() {
+    const item = results[selectedIndex];
+    if (!item) return;
+    const version = ++detailVersion;
+    detailController?.abort();
+    detailController = new AbortController();
+    $("detail-retry").hidden = true;
+    if (!item.contentid) {
+      $("detail-status").textContent = "추가 상세정보가 제공되지 않는 장소입니다.";
+      return;
+    }
+    $("detail-status").textContent = "상세정보를 불러오는 중입니다.";
+    $("detail-overview").textContent = "잠시만 기다려 주세요.";
+    dialog.setAttribute("aria-busy", "true");
+    try {
+      let detail = detailCache.get(String(item.contentid));
+      if (!detail) {
+        const data = await request("detailCommon2", { contentId: String(item.contentid) }, detailController.signal);
+        if (!data.items.length) throw new Error("등록된 상세정보가 없습니다.");
+        detail = data.items[0];
+        detailCache.set(String(item.contentid), detail);
+      }
+      if (version !== detailVersion || !dialog.open) return;
+      paintDetail({ ...item, ...detail });
+      $("detail-status").textContent = "";
+    } catch (error) {
+      if (version !== detailVersion || !dialog.open) return;
+      $("detail-overview").textContent = "상세 소개를 불러오지 못했습니다. 위의 기본 정보는 조회 결과 기준입니다.";
+      $("detail-status").textContent = error.message;
+      $("detail-retry").hidden = false;
+    } finally {
+      if (version === detailVersion) dialog.setAttribute("aria-busy", "false");
+    }
+  }
+
+  function openDetail(index, trigger) {
+    selectedIndex = index;
+    detailTrigger = trigger;
+    paintDetail(results[index]);
+    dialog.showModal();
+    dialog.scrollTop = 0;
+    $("detail-close").focus();
+    loadDetail();
+  }
+
+  $("detail-close").addEventListener("click", () => dialog.close());
+  dialog.addEventListener("click", (event) => {
+    if (event.target !== dialog) return;
+    const rect = dialog.getBoundingClientRect();
+    if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) dialog.close();
+  });
+  dialog.addEventListener("close", () => {
+    detailVersion++;
+    detailController?.abort();
+    dialog.setAttribute("aria-busy", "false");
+    detailTrigger?.focus();
+  });
+  $("detail-retry").addEventListener("click", loadDetail);
+  $("detail-map").addEventListener("click", () => {
+    dialog.close();
+    focusItem(selectedIndex);
+    $("map").scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" });
+  });
 
   async function request(endpoint, params = {}, signal) {
     if (!config.TOUR_API_KEY) throw new Error("관광공사 API 키를 js/config.js에 입력해 주세요.");
@@ -151,6 +254,7 @@
     else if (count > 1) map.setBounds(bounds);
     $("map-status").textContent = results.length ? `현재 페이지 ${results.length}곳 중 ${count}곳을 지도에 표시했습니다.` : "조회 결과의 위치가 지도에 표시됩니다.";
     list.querySelectorAll(".tour-map-button").forEach((button, index) => { button.disabled = !markers[index]; });
+    if (dialog.open) $("detail-map").disabled = !markers[selectedIndex];
   }
 
   function renderCards() {
@@ -183,14 +287,24 @@
       address.textContent = [item.addr1, item.addr2].filter(Boolean).join(" ") || "주소 정보 없음";
       const category = document.createElement("p");
       category.className = "small text-primary";
-      category.textContent = Array.from(type.options).find((option) => option.value === String(item.contenttypeid))?.textContent || "관광정보";
+      category.textContent = categoryName(item);
       const button = document.createElement("button");
       button.type = "button";
-      button.className = "btn btn-outline-primary btn-sm mt-auto tour-map-button";
+      button.className = "btn btn-outline-primary btn-sm tour-map-button";
       button.textContent = coordinate(item) ? "지도에서 보기" : "위치 정보 없음";
       button.disabled = !map || !coordinate(item);
       button.addEventListener("click", () => { focusItem(index); $("map").scrollIntoView({ behavior: "smooth", block: "center" }); });
-      body.append(title, category, address, button);
+      const detailButton = document.createElement("button");
+      detailButton.type = "button";
+      detailButton.className = "btn btn-primary btn-sm";
+      detailButton.textContent = "상세보기";
+      detailButton.setAttribute("aria-label", `${item.title || "관광지"} 상세보기`);
+      detailButton.setAttribute("aria-haspopup", "dialog");
+      detailButton.addEventListener("click", () => openDetail(index, detailButton));
+      const actions = document.createElement("div");
+      actions.className = "card-actions";
+      actions.append(detailButton, button);
+      body.append(category, title, address, actions);
       card.append(body);
       column.append(card);
       list.append(column);
@@ -213,6 +327,7 @@
     list.setAttribute("aria-busy", "true");
     pagination();
     status.textContent = "관광정보를 조회하는 중입니다.";
+    $("results-placeholder").hidden = true;
     try {
       const data = await request("areaBasedList2", { ...filters, numOfRows: String(pageSize), pageNo: String(page), arrange: "A" });
       currentPage = page;
@@ -220,6 +335,11 @@
       results = data.items;
       renderCards();
       status.textContent = total ? `총 ${total.toLocaleString()}곳 중 ${(page - 1) * pageSize + 1}–${(page - 1) * pageSize + results.length}번째 결과입니다.` : "선택한 조건의 관광정보가 없습니다.";
+      $("results-placeholder").hidden = results.length > 0;
+      if (!results.length) {
+        $("results-placeholder").querySelector("h3").textContent = "아직 발견하지 못했어요";
+        $("results-placeholder").querySelector("p").textContent = "다른 지역이나 관광 유형으로 다시 찾아보세요.";
+      }
     } catch (error) {
       results = [];
       total = 0;
