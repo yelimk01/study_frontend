@@ -19,25 +19,30 @@
   </nav>
 </header>
 <main id="main" class="container py-4">
-  <p class="text-secondary small">개발용 페이지 틀 · 기능 미구현</p>
+  <p class="text-secondary small">한국관광공사 관광정보 · 카카오 지도</p>
   <h1 class="h3 mb-4">관광지 조회</h1>
 <form id="search-form" class="row g-3 mb-4">
-<div class="col-12 col-md-4"><label class="form-label" for="area-code">지역</label>
-<select id="area-code" class="form-select"><option value="">지역 선택 (데이터 연결 예정)</option></select></div>
-<div class="col-12 col-md-5"><label class="form-label" for="content-type">관광 유형</label>
+<div class="col-12 col-md-3"><label class="form-label" for="area-code">지역</label>
+<select id="area-code" class="form-select" disabled><option value="">지역 목록 로딩 중</option></select></div>
+<div class="col-12 col-md-3"><label class="form-label" for="sigungu-code">시·군·구</label><select id="sigungu-code" class="form-select" disabled><option value="">시·군·구 전체</option></select></div>
+<div class="col-12 col-md-3"><label class="form-label" for="content-type">관광 유형</label>
 <select id="content-type" class="form-select">
 <option value="">전체</option><option value="12">관광지</option><option value="32">숙박</option>
 <option value="39">음식점</option><option value="14">문화시설</option><option value="15">공연·행사</option>
 <option value="25">여행코스</option><option value="38">쇼핑</option></select></div>
-<div class="col-12 col-md-3 d-flex align-items-end"><button type="button" id="search-button" class="btn btn-primary w-100" disabled>조회</button></div>
+<div class="col-12 col-md-3 d-flex align-items-end"><button type="submit" id="search-button" class="btn btn-primary w-100" disabled>조회</button></div>
 </form>
+<p id="filter-status" class="small text-secondary" role="status"></p>
 <div class="row g-4">
 <section class="col-12 col-lg-7" aria-labelledby="results-title"><h2 id="results-title" class="h5">조회 결과</h2>
-<p id="search-status" role="status">관광지 데이터 표시 영역입니다. 아직 구현되지 않았습니다.</p>
-<div id="attraction-list" class="row g-3"><!-- TODO: 관광지 카드를 DOM으로 추가 --></div></section>
+<p id="search-status" role="status">지역과 관광 유형을 선택한 뒤 조회해 주세요.</p>
+<button type="button" id="retry-areas" class="btn btn-outline-secondary btn-sm mb-3" hidden>지역 목록 다시 불러오기</button>
+<div id="attraction-list" class="row g-3" aria-busy="false"></div>
+<nav id="pagination" class="d-flex align-items-center justify-content-center gap-3 mt-4" aria-label="조회 결과 페이지" hidden><button id="previous-page" type="button" class="btn btn-outline-primary btn-sm">이전</button><span id="page-info" class="small" role="status"></span><button id="next-page" type="button" class="btn btn-outline-primary btn-sm">다음</button></nav></section>
 <section class="col-12 col-lg-5" aria-labelledby="map-title"><h2 id="map-title" class="h5">지도</h2>
-<div id="map" class="placeholder-box">지도 연동 영역 (미구현)</div></section>
+<div id="map" class="tour-map" aria-label="관광지 위치 지도">지도를 불러오는 중입니다.</div><p id="map-status" class="small text-secondary mt-2" role="status">지도 연결을 준비하고 있습니다.</p></section>
 </div>
+  <p class="small text-secondary mt-4">관광정보·사진 출처: 한국관광공사 TourAPI</p>
   <p id="page-message" class="mt-3" role="status"></p>
 </main>
 <footer class="container py-3 border-top text-secondary small">EnjoyTrip · Web(Front) PJT</footer>

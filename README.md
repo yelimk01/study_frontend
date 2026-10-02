@@ -1,8 +1,8 @@
 # EnjoyTrip 프런트엔드 작업 시작 템플릿
 
-기능 구현 없이 페이지와 작업 환경만 준비한 분업용 템플릿입니다.
+관광지 조회 기능을 연결한 분업용 프런트엔드 프로젝트입니다.
 HTML5 + CSS3 + Vanilla JavaScript + Bootstrap 5.3.3 사용. 프레임워크, 빌드 도구, 백엔드 없음.
-조회/가입/로그인/수정/탈퇴/비밀번호 찾기 기능은 전부 미구현이며 버튼은 disabled 상태입니다.
+관광지 조회는 구현되어 있습니다. 가입/로그인/수정/탈퇴/비밀번호 찾기는 회원 담당자의 작업 영역입니다.
 
 ## 실행
 
@@ -31,7 +31,7 @@ ZIP에는 빈 키의 config.js도 포함되어 있어 바로 페이지 확인이
 내비게이션은 각 HTML에 동일하게 넣었습니다. 메뉴 수정 시 모든 페이지를 맞춰 주세요.
 공통 회원 데이터 형식과 저장 키를 먼저 합의하면 충돌을 줄일 수 있습니다.
 
-## 구현해야 할 필수 사항 (현재 전부 미구현)
+## 필수 기능 범위
 
 - F101: 한국관광공사 지역별 관광정보 수집 및 표시.
 - F102: 지역별 관광지·숙박·음식점 조회.
@@ -41,15 +41,15 @@ ZIP에는 빈 키의 config.js도 포함되어 있어 바로 페이지 확인이
 - 폼 유효성 검사, 동적 DOM 조작, localStorage CRUD, 모달 연결.
 - 모바일 반응형 화면, 입력 라벨, 로딩/오류/빈 결과 안내.
 
-관광 유형 선택지만 준비했습니다. 지역 목록과 관광지 데이터는 담당자가 연결하세요.
+관광지 페이지에서 시·도/시·군·구와 관광 유형을 선택해 실제 관광공사 API를 조회할 수 있습니다.
 명세서 작업 순서에는 더미 데이터와 localStorage 활용이 제시되어 있습니다.
 더미 데이터로 개발할 경우 실제 공공데이터 조회가 완료된 것으로 표시하지 마세요.
 
 ## API 및 지도
 
 명세서 준비사항에는 한국관광공사 국문관광정보 서비스_GW와 SGIS 오픈 API가 있습니다.
-본 템플릿은 API/지도 SDK를 로드하지 않고 설정 위치와 지도 영역만 제공합니다.
-카카오 지도는 앞서 논의한 선택 연동용 설정만 포함했습니다. SGIS 구현을 대체했다고 간주하지 않습니다.
+관광지 페이지는 KorService2 API를 호출하고 카카오 지도 SDK를 동적으로 로드합니다.
+카카오 지도에 현재 페이지의 관광지 마커를 표시합니다. SGIS 기능은 구현되어 있지 않습니다.
 수업에서 SGIS 사용을 요구하는 경우 SGIS를 연결하세요.
 
 - 한국관광공사: https://www.data.go.kr/data/15101578/openapi.do
@@ -160,3 +160,17 @@ For open source projects, say how it is licensed.
 
 ## Project status
 If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+
+## 관광지 조회 실행 및 확인
+
+- `js/config.js`의 `TOUR_API_KEY`, `KAKAO_JS_KEY`에 발급받은 키를 입력합니다. 실제 설정 파일은 Git에서 제외됩니다.
+- 카카오디벨로퍼스 해당 앱의 **카카오맵 > 사용 설정 > 상태 ON**을 확인합니다.
+- JavaScript 키의 SDK 도메인에 실제 개발 주소를 등록합니다. 예: `http://localhost:5500`. `127.0.0.1`로 접속하면 `http://127.0.0.1:5500`도 등록합니다.
+- 개발 서버에서 `/attractions.html`에 접속하고 지역, 시·군·구, 관광 유형을 선택한 뒤 조회합니다.
+- 결과는 12개씩 표시되며 이전/다음 페이지로 이동할 수 있습니다.
+- 좌표가 있는 결과의 '지도에서 보기'를 누르면 해당 마커로 이동합니다. 지도 설정에 문제가 있어도 관광지 목록 조회는 가능합니다.
+- 이미지 및 좌표 누락, 로딩, 빈 결과, API 오류를 안내합니다.
+- 데이터 및 사진 출처: 한국관광공사 TourAPI. 지도: Kakao Maps.
+- 관광정보 상세 모달은 아직 구현하지 않았습니다.
+
+검증: 실제 API로 지역/시군구 목록, 서울 관광지 조회, 페이지 이동, 모바일 화면을 확인했습니다. 지도 SDK는 앱 서비스 비활성화로 403 응답을 받았으며, 마커 표시/교체/선택 로직은 모의 SDK로 검증했습니다. 카카오 사용 설정을 활성화한 뒤 실제 지도 화면을 추가 확인해야 합니다.
