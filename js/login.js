@@ -1,5 +1,12 @@
 "use strict";
-// 담당 페이지: 로그인
-// TODO: F108 회원 정보 확인 및 로그인 상태 저장. 공통 내비게이션의 로그인/로그아웃 상태 연결.
-// 현재는 기능 구현 없이 페이지 틀만 제공합니다.
-// 구현할 때 버튼의 disabled 속성을 제거하고 이벤트를 연결하세요.
+if (new URLSearchParams(location.search).has('registered')) EnjoyTrip.message('회원가입이 완료되었습니다. 로그인하세요.');
+if (new URLSearchParams(location.search).has('reset')) EnjoyTrip.message('비밀번호가 변경되었습니다. 새 비밀번호로 로그인하세요.');
+document.getElementById('page-form').addEventListener('submit', event => {
+  event.preventDefault();
+  EnjoyTrip.run(async () => {
+    const id=document.getElementById('user-id').value.trim();
+    const user=EnjoyTrip.users().find(u=>u.id.toLowerCase()===id.toLowerCase());
+    if (!user || !await EnjoyTrip.verify(user,document.getElementById('password').value)) throw new Error('아이디 또는 비밀번호를 확인하세요.');
+    EnjoyTrip.save(EnjoyTrip.keys.current,user.id);location.href='profile.html';
+  });
+});

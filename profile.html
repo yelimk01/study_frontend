@@ -19,15 +19,8 @@
   </nav>
 </header>
 <main id="main" class="container py-4">
-  <p class="text-secondary small">개발용 페이지 틀 · 기능 미구현</p>
-  <h1 class="h3 mb-4">회원정보</h1><form id="page-form" class="card card-body form-panel"><div class="mb-3"><label class="form-label" for="user-id">아이디</label><input class="form-control" id="user-id" name="user-id" type="text"></div><div class="mb-3"><label class="form-label" for="name">이름</label><input class="form-control" id="name" name="name" type="text" autocomplete="name"></div><div class="mb-3"><label class="form-label" for="email">이메일</label><input class="form-control" id="email" name="email" type="email" autocomplete="email"></div><div class="d-flex flex-wrap gap-2"><button id="update-button" class="btn btn-primary" type="button" disabled>수정</button><button id="logout-button" class="btn btn-outline-secondary" type="button" disabled>로그아웃</button><button id="delete-button" class="btn btn-outline-danger" type="button" disabled>탈퇴</button></div></form><div class="modal fade" id="delete-modal" tabindex="-1" aria-labelledby="delete-modal-title" aria-hidden="true">
-<div class="modal-dialog"><div class="modal-content"><div class="modal-header">
-<h2 class="modal-title fs-5" id="delete-modal-title">회원 탈퇴</h2>
-<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button></div>
-<div class="modal-body">회원 탈퇴 확인 영역입니다.</div><div class="modal-footer">
-<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-<button id="confirm-delete-button" type="button" class="btn btn-danger" disabled>탈퇴</button>
-</div></div></div></div>
+  <p class="text-secondary small">EnjoyTrip · 회원 서비스</p>
+  <h1 class="h3 mb-4">회원정보</h1><form id="page-form" class="card card-body form-panel"><div class="mb-3"><label class="form-label" for="user-id">아이디</label><input class="form-control" readonly id="user-id" name="user-id" type="text" required maxlength="100"></div><div class="mb-3"><label class="form-label" for="name">이름</label><input class="form-control" id="name" name="name" type="text" autocomplete="name" required maxlength="100"></div><div class="mb-3"><label class="form-label" for="email">이메일</label><input class="form-control" id="email" name="email" type="email" autocomplete="email" required maxlength="100"></div><div class="d-flex flex-wrap gap-2"><button id="update-button" class="btn btn-primary" type="submit">수정</button><button id="logout-button" class="btn btn-outline-secondary" type="button">로그아웃</button><button id="delete-button" class="btn btn-outline-danger" type="button">탈퇴</button></div></form><div id="delete-modal" class="confirm-overlay" role="dialog" aria-modal="true" aria-labelledby="delete-modal-title" hidden><div class="card card-body form-panel"><h2 id="delete-modal-title" class="h5">회원 탈퇴</h2><p>회원정보가 삭제됩니다. 작성한 게시글은 유지됩니다. 탈퇴하시겠습니까?</p><div class="d-flex gap-2"><button id="cancel-delete-button" class="btn btn-secondary" type="button">취소</button><button id="confirm-delete-button" class="btn btn-danger" type="button">탈퇴</button></div></div></div>
   <p id="page-message" class="mt-3" role="status"></p>
 </main>
 <footer class="container py-3 border-top text-secondary small">EnjoyTrip · Web(Front) PJT</footer>

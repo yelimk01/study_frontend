@@ -1,5 +1,22 @@
 "use strict";
-// 담당 페이지: 회원가입
-// TODO: F107 입력 유효성 검사, 아이디 중복 검사, 비밀번호 확인, localStorage 회원 저장. 저장 성공 후 로그인 페이지 이동.
-// 현재는 기능 구현 없이 페이지 틀만 제공합니다.
-// 구현할 때 버튼의 disabled 속성을 제거하고 이벤트를 연결하세요.
+const signupForm = document.getElementById('page-form');
+signupForm.addEventListener('submit', event => {
+  event.preventDefault();
+  EnjoyTrip.run(async () => {
+    const id = document.getElementById('user-id').value.trim();
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim().toLowerCase();
+    const password = document.getElementById('password').value;
+    if (!/^[A-Za-z0-9_]{4,20}$/.test(id)) throw new Error('아이디는 영문·숫자·밑줄로 4~20자 입력하세요.');
+    if (!name) throw new Error('이름을 입력하세요.');
+    EnjoyTrip.passwordRule(password);
+    if (password !== document.getElementById('password-confirm').value) throw new Error('비밀번호 확인이 다릅니다.');
+    const secret = await EnjoyTrip.credential(password);
+    const users = EnjoyTrip.users();
+    if (users.some(u => u.id.toLowerCase() === id.toLowerCase())) throw new Error('이미 사용 중인 아이디입니다.');
+    if (users.some(u => u.email === email)) throw new Error('이미 가입한 이메일입니다.');
+    users.push({id,name,email,...secret,createdAt:new Date().toISOString()});
+    EnjoyTrip.save(EnjoyTrip.keys.users, users);
+    location.href='login.html?registered=1';
+  });
+});
